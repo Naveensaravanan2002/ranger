@@ -1,0 +1,20 @@
+﻿# Java & Maven compiled files
+backend/target/
+*.class
+*.jar
+*.war
+
+# IntelliJ IDEA & VS Code workspace files
+.idea/
+*.iml
+.vscode/
+
+# Node / React dependencies & build
+frontend/node_modules/
+frontend/dist/
+
+# SECRET ENVIRONMENT FILES (NEVER COMMIT PASSWORDS!)
+.env
+.env.*
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-local.properties
