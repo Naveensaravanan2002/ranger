@@ -1,0 +1,1 @@
+The bundled Space Grotesk and DM Sans font files are licensed under the SIL Open Font License 1.1. Their original copyright notices and license texts are included in this directory. See each text file for the applicable license terms.

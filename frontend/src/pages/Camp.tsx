@@ -1,0 +1,34 @@
+import { Link, useOutletContext } from 'react-router-dom'
+import { ArrowRight, ArrowUpRight, CircleDollarSign, MoonStar, Cookie, ReceiptText, Sparkles } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useRanger } from '../lib/store'
+import { inr,periodRows,shortDate,summarize } from '../lib/math'
+import type { DashboardContext } from '../components/Dashboard'
+
+export function Camp(){
+  const {rows,settings,mode,demoLive}=useRanger(),{period}=useOutletContext<DashboardContext>(), reduced=useReducedMotion()
+  const selected=periodRows(rows,period,new Date(),settings.timezone),stats=summarize(selected,settings)
+  const recent=[...selected].sort((a,b)=>b.occurredAt.localeCompare(a.occurredAt)).slice(0,4)
+  const groups=Object.entries(selected.filter(r=>r.category!=='INVESTMENT').reduce<Record<string,number>>((a,r)=>{a[r.category]=(a[r.category]||0)+Math.round(r.total*100);return a},{})).sort((a,b)=>b[1]-a[1])
+  const spending=selected.filter(r=>r.category!=='INVESTMENT')
+  const missingFees=spending.filter(r=>r.feeDetails.length===0).length, hasFeeLines=spending.some(r=>r.feeDetails.length>0)
+  const missingItems=spending.filter(r=>r.items.length===0).length, hasItems=spending.some(r=>r.items.length>0)
+  const pricedJunk=spending.some(r=>r.items.some(item=>item.junkFood&&item.amount!==null))
+  const feeValue=spending.length&&!hasFeeLines?'Unknown':inr(stats.extraFees)
+  const feeNote=spending.length===0?'No spending receipts in this view':!hasFeeLines?'No fee breakdown extracted':missingFees?`${missingFees} receipt(s) have no fee breakdown`:'Extracted lines only · may be incomplete'
+  const junkValue=spending.length&&!hasItems?'Unknown':stats.junkItemsWithoutPrice&&!pricedJunk?'Unknown':inr(stats.junkFood)
+  const junkNote=spending.length===0?'No spending receipts in this view':!hasItems?'No item details extracted':stats.junkItemsWithoutPrice?`${stats.junkItemsWithoutPrice} tagged item(s) have no price`:missingItems?`${missingItems} receipt(s) have no item details`:'Tagged, priced items only · may be incomplete'
+  const approximateTimes=spending.some(r=>r.approximateTime)
+  const roast=spending.length===0?'No spending receipts in this view yet. Bring me a trail to follow.':stats.extraFees>0?`${inr(stats.extraFees)} in extracted fees? Those little guys really know how to make an entrance.`:missingFees?'Some receipts have no fee breakdown. I won’t guess those fees were zero.':'No positive fees extracted so far. Some details may still be missing.'
+  return <div className="page-wrap">
+    <div className="page-heading"><div><div className="eyebrow eyebrow-with-dot"><span className="dot"/> THE CAMP / YOUR OVERVIEW</div><h1>Howdy, trailblazer<span>.</span></h1><p>Here’s what your {mode==='demo'?'sample ':' '}money’s been up to.</p></div><div className="heading-stamp">THE BIG<br/>PICTURE <span>✳</span></div></div>
+    <div className="camp-grid"><motion.div initial={reduced?false:{opacity:0,y:12}} animate={{opacity:1,y:0}} className="total-card"><div className="card-topline"><span>TOTAL RECORDED SPEND</span><span>↗</span></div><div className="total-amount">{inr(stats.totalSpend)}<span>✦</span></div><div className="total-bottom"><span>{stats.receiptCount} {stats.receiptCount===1?'receipt':'receipts'} in this view</span><span>NOT INCLUDING INVESTMENTS</span></div><div className="total-ring ring-one"/><div className="total-ring ring-two"/></motion.div>
+      <div className="metric-stack"><Link to="/app/trail?filter=fees" className="metric-card metric-yellow"><span className="metric-icon"><ReceiptText size={19}/></span><div><span>EXTRA FEES</span><strong>{feeValue}</strong><small>{feeNote}</small></div><ArrowUpRight size={18}/></Link><Link to="/app/trail?filter=late" className="metric-card metric-blue"><span className="metric-icon"><MoonStar size={19}/></span><div><span>LATE-NIGHT ORDERS</span><strong>{inr(stats.lateNight)}</strong><small>{settings.start} until before {settings.end}{approximateTimes?' · includes approximate times':''}</small></div><ArrowUpRight size={18}/></Link><Link to="/app/trail?filter=junk" className="metric-card metric-pink"><span className="metric-icon"><Cookie size={19}/></span><div><span>JUNK-FOOD ITEMS</span><strong>{junkValue}</strong><small>{junkNote}</small></div><ArrowUpRight size={18}/></Link></div>
+    </div>
+    <div className="overlap-note"><Sparkles size={14}/> Heads up: these categories overlap. Please don’t add them together.</div>
+    <div className="camp-lower"><div className="insight-card"><div className="panel-heading"><div><span className="eyebrow">A LITTLE BREAKDOWN</span><h2>Where it went<span>.</span></h2></div><CircleDollarSign size={22}/></div>{groups.length? <div className="bar-list">{groups.slice(0,5).map(([category,cents],i)=><div className="bar-group" key={category}><div><span><i className={`bar-dot color-${i}`}/>{category.charAt(0)+category.slice(1).toLowerCase()}</span><b>{inr(cents/100)}</b></div><div className="bar-track"><div className={`bar-fill color-${i}`} style={{width:`${stats.totalSpend?Math.min(100,(cents/100)/stats.totalSpend*100):0}%`}}/></div></div>)}</div>:<p className="empty-line">No spending records in this period yet.</p>}<div className="card-footnote">Based on recorded purchases, excluding investment contributions.</div></div>
+      <div className="roast-card"><div className="roast-copy"><span className="eyebrow">A WORD FROM RANGER</span><span className="quote-mark">“</span><p>{roast}</p><small>And hey, what do I know? I’m just a goat.</small></div><img src="/assets/ranger-roast.webp" alt="Ranger gestures cheekily"/><span className="roast-spark">✳</span></div></div>
+    <div className="recent-section"><div className="panel-heading"><div><span className="eyebrow">FRESH FROM THE TRAIL</span><h2>Recent activity<span>.</span></h2></div><Link className="panel-link" to="/app/trail">See all <ArrowRight size={16}/></Link></div><div className="recent-list">{recent.length?recent.map((r,i)=><Link to="/app/trail" className="recent-row" key={r.id}><span className={`receipt-symbol color-${i}`}>{r.category==='INVESTMENT'?'↗':r.category==='FOOD'?'✳':r.category==='SHOPPING'?'◈':'✿'}</span><div><strong>{r.merchant}</strong><small>{shortDate(r.occurredAt,settings.timezone)} · {r.approximateTime?(r.source==='MANUAL'?'import time (approx.)':'email time (approx.)'):r.category.toLowerCase()}</small></div><b>{inr(r.total)}</b><ArrowUpRight size={16}/></Link>):<p className="empty-line">No receipts in this view. {mode==='account'?'Import a supported receipt to start your trail.':'Try another time period.'}</p>}</div></div>
+    <div className="sample-caption">{mode==='demo'?(demoLive?'DEMO DATA · SYNTHETIC HTML PARSED BY RANGER':'DEMO DATA · PRELOADED SYNTHETIC SAMPLE'): 'PRIVATE LEDGER · EXTRACTED RECEIPT DATA'} <span>✳</span></div>
+  </div>
+}

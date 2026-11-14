@@ -1,0 +1,31 @@
+/* Account controls use the existing temporary palette tokens. */
+.profile-menu{position:relative;flex:none}
+.profile-trigger{width:42px;height:42px;display:grid;place-items:center;padding:3px;border:1px solid var(--line);border-radius:50%;background:var(--white);transition:border-color .2s,transform .2s}
+.profile-trigger:hover{border-color:var(--lime-deep);transform:translateY(-1px)}
+.profile-avatar{width:34px;height:34px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--lime);color:var(--ink);font-family:var(--display);font-size:15px;font-weight:800}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-popover{position:absolute;z-index:50;right:0;top:calc(100% + 12px);width:min(280px,calc(100vw - 32px));padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--white);box-shadow:0 18px 45px rgba(30,41,35,.15)}
+.profile-details{display:grid;gap:4px;padding:12px 12px 14px;border-bottom:1px solid var(--line);min-width:0}
+.profile-details>span{font-family:var(--display);font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--muted)}
+.profile-details strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--display);font-size:15px}
+.profile-details small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--muted)}
+.profile-links{display:grid;gap:2px;padding-top:6px}
+.profile-links button,.profile-links a{width:100%;min-height:39px;display:flex;align-items:center;gap:11px;padding:8px 11px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;font-size:12px;font-weight:700}
+.profile-links button:hover:not(:disabled),.profile-links a:hover{background:#eff3e6}
+.profile-links svg{color:#6f806d;flex:none}
+.profile-message{margin:7px 10px 9px;color:#a44d3b;font-size:11px}
+@media(max-width:800px){
+  .profile-trigger{width:38px;height:38px}
+  .profile-avatar{width:30px;height:30px}
+  .landing-nav .nav-signin.landing-account{display:inline-flex;white-space:nowrap}
+  .landing-nav .nav-actions{gap:12px}
+}
+@media(max-width:400px){
+  .app-top .top-actions{gap:6px}
+  .top-actions .period-select select{width:72px}
+  .top-actions .btn-small.import-action{min-width:36px;padding:0;font-size:0;gap:0}
+  .top-actions .btn-small.import-action svg{height:16px;width:16px}
+  .landing-nav .nav-actions{gap:8px}
+  .landing-nav .landing-account{font-size:11px}
+  .landing-nav .btn-small{gap:6px;padding:0 8px;font-size:11px}
+}
